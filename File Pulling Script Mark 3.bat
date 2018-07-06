@@ -3,11 +3,12 @@ REM Created and maintained by Matthew Putnam with help from Braidon Myers.
 REM Built on and for Windows 10. Not tested on other versions of Windows.
 
 REM ---- TODO ----
-REM Add option to carry directories to save having to retype entire URLs
+REM Add option to carry directories between runs, to save having to retype entire file paths
 REM Take an angle grinder to the progress indicator
-REM Cleanup/improve commentary
-REM Reduce repetition of the same code (Looking at you, restart if statement)
+REM Cleanup/improve commentary (ha)
+REM Reduce repetition of the same code (Looking at you, for loops)
 REM General optimizations
+REM ---- END TODO : BEGIN SCRIPT ----
 
 REM Sets "beginning" point, clears CMD screen, sets environment variable to allow for math in
 REM for loop, and sets the debug path used for general debugging.
@@ -33,7 +34,7 @@ REM Combines the from directory and filetype, constructs and saves command to be
 set fromDirPlusFiletype=%fromDir%*%filetype%
 set command="DIR %fromDirPlusFiletype% | find /C "%filetype%""
 
-REM For loop to determine the amount of files affected by command made above.
+REM For loop to determine the amount of files to be moved by criteria set.
 for /f "tokens=* USEBACKQ" %%A in (`%command%`) DO set countOfAffectedFiles=%%A
 
 REM Confirms prompted-for information w/ user.
@@ -43,72 +44,46 @@ set /p confirm="Y for yes, anything else for no: "
 REM Goes to end if user did not confirm prompted-for information.
 if /I NOT %confirm% == y goto :end
 
-REM Created variable to keep track of times ran (used in this case to keep track
-REM of the amount of files moved), uses For loop to find a file matching user-entered
-REM criteria, then move that file to user-entered to directory, then add one
-REM to timesRan, and then print out the amount of files moved out of total.
-REM Lastly, reports success of moving files and then asks if the user
-REM wants to restart.
+REM Created variable to keep track of times the for loop runs, then 
+REM uses for loop to find a file matching user-entered criteria,
+REM then move that file to to directory, then add one to timesRan,
+REM and then print out the amount of files moved out of total (makeshift progress indicator).
+REM Lastly, reports success of moving files and jumps to end.
 set timesRan=0
 for /R "%fromDir%" %%i in (*%filetype%) do move "%%i" "%toDir%" >nul && set /a timesRan = timesRan + 1 && echo Moved file !timesRan! of %countOfAffectedFiles%
 echo Successfully moved %timesRan% files
-set /p restart="Do you want to restart? Y for yes, anything else for no: "
 
-REM If user entered Y, jumps to beginning. If they did not, exits script.
-if /i %restart% == Y (
-goto :beginning 
-) else (
-exit
-)
+REM Jump to :end of script.
+goto :end
 
-REM Possibly unneccessary end/exit for :move ?
-pause
-exit
-
-REM Del(ete) portion of script.
-REM Prompts for from directory, and type of files to delete.
+REM This is the del(ete) portion of script.
+REM Prompts for a from directory, and type of files to delete.
 :del
 set /p fromDir="Enter full location path to delete files from: "
 set /p filetype="Enter filetype to delete, including period (e.g., .txt): "
 
-REM Combines from directory and filetype, then creates command to be executed.
-REM Then uses for loop to discover amount of files to be deleted.
+REM Combines from directory and filetype, then creates and executes a command
+REM that is ran through a for loop to discover the amount of files to be deleted.
 set fromDirPlusFiletype=%fromDir%*%filetype%
 set command="DIR %fromDirPlusFiletype% | find /C "%filetype%""
 for /f "tokens=* USEBACKQ" %%A in (`%command%`) DO set countOfAffectedFiles=%%A
 
-REM Prompts user to ensure entered information is correct.
+REM Prompts user to ensure information is correct.
 echo Are you sure you want to delete %countOfAffectedFiles% %filetype% files from %fromDir%?
 set /p confirm="Y for yes, anything else for no: "
 
-REM If user did not say Y, jump to the end.
+REM If user did not enter Y, jump to the end.
 if /I NOT %confirm% == Y goto :end
 
 REM Created variable to keep track of times ran (used here to keep track of
-REM deleted files). Uses for loop to run previously created command,
-REM deleting appropriate files. Then reports success and final count,
-REM asks if user wants to restart.
+REM deleted files). Uses for loop to delete all files meeting provided criteria.
+REM Then reports success and final deleted files count.
 set timesRan=0
 for /R "%fromDir%"  %%i in (*%filetype%) do del "%%i" && set /a timesRan = timesRan + 1 && echo Deleted file !timesRan! of %countOfAffectedFiles%
-echo Successfully deleted %timesRan% files
-set /p restart="Do you want to restart? Y for yes, anything else for no: "
+echo Successfully deleted %timesRan% files.
 
-REM If user wants to restart, go to beginning. Else, exit script.
-if /i %restart% == Y (
-goto :beginning 
-) else (
-exit
-)
-
-REM End of script. If user wants to restart, go to beginning. Else, exit script.
+REM End of script. Prompts user if they want to restart. If they enter Y, goes to beginning.
+REM Else, hits end of script and exits.
 :end
 set /p restart="Do you want to restart? Y for yes, anything else for no: "
-
-REM If user entered Y, jumps to beginning. If they did not, exits script.
-if /i %restart% == Y (
-goto :beginning 
-) else (
-exit
-)
-pause
-exit
+if /i %restart% == Y goto :beginning
