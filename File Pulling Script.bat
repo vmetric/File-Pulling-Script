@@ -8,6 +8,10 @@ REM Take an angle grinder to the progress indicator
 REM Cleanup/improve commentary (ha)
 REM Reduce repetition of the same code (Looking at you, for loops)
 REM General optimizations
+REM Add repeating of given input once entered (e.g., "you entered: "
+REM If possible, add ability to restart without having to go through entire script
+REM If possible, add reporting of speed (x items per second)
+REM Add estimate of time left
 REM ---- END TODO : BEGIN SCRIPT ----
 
 REM Sets "beginning" point, clears CMD screen, sets environment variable to allow for math in
